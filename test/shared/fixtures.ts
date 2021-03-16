@@ -4,8 +4,9 @@ import { deployContract } from 'ethereum-waffle'
 
 import { expandTo18Decimals } from './utilities'
 
-import AliumFactory from '../../node_modules/@uniswap/v2-core/build/UniswapV2Factory.json'
-import IAliumPair from '../../node_modules/@uniswap/v2-core/build/UniswapV2Pair.json'
+// import AliumFactory from '../../build/AliumFactory.json'
+import AliumFactory from '@aliumswap/alium-swap-core/build/AliumFactory.json'
+import IAliumPair from '../../build/IAliumPair.json'
 
 import ERC20 from '../../build/ERC20.json'
 import WETH9 from '../../build/WETH9.json'
