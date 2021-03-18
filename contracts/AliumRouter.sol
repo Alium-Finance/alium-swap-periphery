@@ -8,12 +8,13 @@ import './libraries/AliumLibrary.sol';
 import './libraries/SafeMath.sol';
 import './interfaces/IERC20.sol';
 import './interfaces/IWETH.sol';
+import './interfaces/IAliumPair.sol';
 
 contract AliumRouter is IAliumRouter02 {
     using SafeMath for uint;
 
-    address public immutable override factory;
-    address public immutable override WETH;
+    address public override factory;
+    address public override WETH;
 
     modifier ensure(uint deadline) {
         require(deadline >= block.timestamp, 'AliumRouter: EXPIRED');
@@ -73,6 +74,7 @@ contract AliumRouter is IAliumRouter02 {
         TransferHelper.safeTransferFrom(tokenA, msg.sender, pair, amountA);
         TransferHelper.safeTransferFrom(tokenB, msg.sender, pair, amountB);
         liquidity = IAliumPair(pair).mint(to);
+        IAliumPair(pair).sync();
     }
     function addLiquidityETH(
         address token,
@@ -97,6 +99,7 @@ contract AliumRouter is IAliumRouter02 {
         liquidity = IAliumPair(pair).mint(to);
         // refund dust eth, if any
         if (msg.value > amountETH) TransferHelper.safeTransferETH(msg.sender, msg.value - amountETH);
+        IAliumPair(pair).sync();
     }
 
     // **** REMOVE LIQUIDITY ****
@@ -116,6 +119,7 @@ contract AliumRouter is IAliumRouter02 {
         (amountA, amountB) = tokenA == token0 ? (amount0, amount1) : (amount1, amount0);
         require(amountA >= amountAMin, 'AliumRouter: INSUFFICIENT_A_AMOUNT');
         require(amountB >= amountBMin, 'AliumRouter: INSUFFICIENT_B_AMOUNT');
+        IAliumPair(pair).sync();
     }
     function removeLiquidityETH(
         address token,
@@ -137,6 +141,7 @@ contract AliumRouter is IAliumRouter02 {
         TransferHelper.safeTransfer(token, to, amountToken);
         IWETH(WETH).withdraw(amountETH);
         TransferHelper.safeTransferETH(to, amountETH);
+        IAliumPair(AliumLibrary.pairFor(factory, token, WETH)).sync();
     }
     function removeLiquidityWithPermit(
         address tokenA,
@@ -152,6 +157,7 @@ contract AliumRouter is IAliumRouter02 {
         uint value = approveMax ? uint(-1) : liquidity;
         IAliumPair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
         (amountA, amountB) = removeLiquidity(tokenA, tokenB, liquidity, amountAMin, amountBMin, to, deadline);
+        IAliumPair(pair).sync();
     }
     function removeLiquidityETHWithPermit(
         address token,
@@ -166,6 +172,7 @@ contract AliumRouter is IAliumRouter02 {
         uint value = approveMax ? uint(-1) : liquidity;
         IAliumPair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
         (amountToken, amountETH) = removeLiquidityETH(token, liquidity, amountTokenMin, amountETHMin, to, deadline);
+        IAliumPair(pair).sync();
     }
 
     // **** REMOVE LIQUIDITY (supporting fee-on-transfer tokens) ****
@@ -189,6 +196,7 @@ contract AliumRouter is IAliumRouter02 {
         TransferHelper.safeTransfer(token, to, IERC20(token).balanceOf(address(this)));
         IWETH(WETH).withdraw(amountETH);
         TransferHelper.safeTransferETH(to, amountETH);
+        IAliumPair(AliumLibrary.pairFor(factory, token, WETH)).sync();
     }
     function removeLiquidityETHWithPermitSupportingFeeOnTransferTokens(
         address token,
@@ -205,6 +213,7 @@ contract AliumRouter is IAliumRouter02 {
         amountETH = removeLiquidityETHSupportingFeeOnTransferTokens(
             token, liquidity, amountTokenMin, amountETHMin, to, deadline
         );
+        IAliumPair(AliumLibrary.pairFor(factory, token, WETH)).sync();
     }
 
     // **** SWAP ****
@@ -216,9 +225,8 @@ contract AliumRouter is IAliumRouter02 {
             uint amountOut = amounts[i + 1];
             (uint amount0Out, uint amount1Out) = input == token0 ? (uint(0), amountOut) : (amountOut, uint(0));
             address to = i < path.length - 2 ? AliumLibrary.pairFor(factory, output, path[i + 2]) : _to;
-            IAliumPair(AliumLibrary.pairFor(factory, input, output)).swap(
-                amount0Out, amount1Out, to, new bytes(0)
-            );
+            IAliumPair pair = IAliumPair(AliumLibrary.pairFor(factory, input, output));
+            pair.swap(amount0Out, amount1Out, to, new bytes(0));
         }
     }
     function swapExactTokensForTokens(
