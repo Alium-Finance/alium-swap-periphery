@@ -18,7 +18,8 @@ contract RouterEventEmitter {
         (bool success, bytes memory returnData) = router.delegatecall(abi.encodeWithSelector(
             IAliumRouter01(router).swapExactTokensForTokens.selector, amountIn, amountOutMin, path, to, deadline
         ));
-        assert(success);
+        require(success, 'swapExactTokensForTokens issue');
+        /*assert(success);*/
         emit Amounts(abi.decode(returnData, (uint[])));
     }
 
