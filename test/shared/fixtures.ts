@@ -15,6 +15,7 @@ import AliumRouter01 from '../../build/AliumRouter01.json'
 import AliumMigrator from '../../build/AliumMigrator.json'
 import AliumRouter02 from '../../build/AliumRouter.json'
 import RouterEventEmitter from '../../build/RouterEventEmitter.json'
+import { AddressZero } from 'ethers/constants'
 
 const overrides = {
   gasLimit: 9999999
@@ -42,12 +43,21 @@ interface AddPairResult {
   token1: Contract
 }
 
-export async function addPair(provider: Web3Provider, [wallet]: Wallet[], factoryV2: Contract): Promise<AddPairResult> {
+export async function addPair(provider: Web3Provider, [wallet]: Wallet[], factoryV2: Contract, deployedContract: Contract|null): Promise<AddPairResult> {
   const tokenA = await deployContract(wallet, ERC20, [expandTo18Decimals(10000)])
-  const tokenB = await deployContract(wallet, ERC20, [expandTo18Decimals(10000)])
+  let tokenB;
+  if (deployedContract === null) {
+    tokenB = await deployContract(wallet, ERC20, [expandTo18Decimals(10000)]);
+  } else {
+    tokenB = deployedContract;
+  }
 
   // initialize V2
-  await factoryV2.createPair(tokenA.address, tokenB.address)
+
+  if (AddressZero === (await factoryV2.getPair(tokenA.address, tokenB.address)).toString()) {
+    await factoryV2.createPair(tokenA.address, tokenB.address)
+  }
+
   const pairAddress = await factoryV2.getPair(tokenA.address, tokenB.address)
   const pair = new Contract(pairAddress, JSON.stringify(IAliumPair.abi), provider).connect(wallet)
 
