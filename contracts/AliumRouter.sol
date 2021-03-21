@@ -8,6 +8,7 @@ import './libraries/AliumLibrary.sol';
 import './libraries/SafeMath.sol';
 import './interfaces/IERC20.sol';
 import './interfaces/IWETH.sol';
+import './interfaces/IAliumPair.sol';
 
 contract AliumRouter is IAliumRouter02 {
     using SafeMath for uint;
