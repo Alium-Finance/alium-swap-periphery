@@ -83,8 +83,8 @@ describe('UniswapV2Router{01,02}', () => {
             MaxUint256,
             overrides
           )
-        )
-          .to.emit(token0, 'Transfer')
+       )
+           .to.emit(token0, 'Transfer')
           .withArgs(wallet.address, pair.address, token0Amount)
           .to.emit(token1, 'Transfer')
           .withArgs(wallet.address, pair.address, token1Amount)
@@ -305,7 +305,7 @@ describe('UniswapV2Router{01,02}', () => {
         const token0Amount = expandTo18Decimals(5)
         const token1Amount = expandTo18Decimals(10)
         const swapAmount = expandTo18Decimals(1)
-        const expectedOutputAmount = bigNumberify('1662497915624478906')
+        const expectedOutputAmount = bigNumberify('1663192997082117548')
 
         beforeEach(async () => {
           await addLiquidity(token0Amount, token1Amount)
@@ -366,10 +366,10 @@ describe('UniswapV2Router{01,02}', () => {
             overrides
           )
           const receipt = await tx.wait()
-          expect(receipt.gasUsed).to.eq(
+          expect(receipt.gasUsed).to.below(
             {
-              [RouterVersion.UniswapV2Router01]: 101876,
-              [RouterVersion.UniswapV2Router02]: 101898
+              [RouterVersion.UniswapV2Router01]: 104000,
+              [RouterVersion.UniswapV2Router02]: 104000
             }[routerVersion as RouterVersion]
           )
         }).retries(3)
@@ -378,7 +378,7 @@ describe('UniswapV2Router{01,02}', () => {
       describe('swapTokensForExactTokens', () => {
         const token0Amount = expandTo18Decimals(5)
         const token1Amount = expandTo18Decimals(10)
-        const expectedSwapAmount = bigNumberify('557227237267357629')
+        const expectedSwapAmount = bigNumberify(/* '557227237267357629' */'556947925368978001')
         const outputAmount = expandTo18Decimals(1)
 
         beforeEach(async () => {
@@ -429,7 +429,7 @@ describe('UniswapV2Router{01,02}', () => {
         const WETHPartnerAmount = expandTo18Decimals(10)
         const ETHAmount = expandTo18Decimals(5)
         const swapAmount = expandTo18Decimals(1)
-        const expectedOutputAmount = bigNumberify('1662497915624478906')
+        const expectedOutputAmount = bigNumberify('1663192997082117548')
 
         beforeEach(async () => {
           await WETHPartner.transfer(WETHPair.address, WETHPartnerAmount)
@@ -515,10 +515,10 @@ describe('UniswapV2Router{01,02}', () => {
             }
           )
           const receipt = await tx.wait()
-          expect(receipt.gasUsed).to.eq(
+          expect(receipt.gasUsed).to.below(
             {
-              [RouterVersion.UniswapV2Router01]: 138770,
-              [RouterVersion.UniswapV2Router02]: 138770
+              [RouterVersion.UniswapV2Router01]: 141000,
+              [RouterVersion.UniswapV2Router02]: 141000
             }[routerVersion as RouterVersion]
           )
         }).retries(3)
@@ -527,7 +527,7 @@ describe('UniswapV2Router{01,02}', () => {
       describe('swapTokensForExactETH', () => {
         const WETHPartnerAmount = expandTo18Decimals(5)
         const ETHAmount = expandTo18Decimals(10)
-        const expectedSwapAmount = bigNumberify('557227237267357629')
+        const expectedSwapAmount = bigNumberify('556947925368978001')
         const outputAmount = expandTo18Decimals(1)
 
         beforeEach(async () => {
@@ -596,7 +596,7 @@ describe('UniswapV2Router{01,02}', () => {
         const WETHPartnerAmount = expandTo18Decimals(5)
         const ETHAmount = expandTo18Decimals(10)
         const swapAmount = expandTo18Decimals(1)
-        const expectedOutputAmount = bigNumberify('1662497915624478906')
+        const expectedOutputAmount = bigNumberify('1663192997082117548')
 
         beforeEach(async () => {
           await WETHPartner.transfer(WETHPair.address, WETHPartnerAmount)
@@ -663,7 +663,7 @@ describe('UniswapV2Router{01,02}', () => {
       describe('swapETHForExactTokens', () => {
         const WETHPartnerAmount = expandTo18Decimals(10)
         const ETHAmount = expandTo18Decimals(5)
-        const expectedSwapAmount = bigNumberify('557227237267357629')
+        const expectedSwapAmount = bigNumberify('556947925368978001')
         const outputAmount = expandTo18Decimals(1)
 
         beforeEach(async () => {

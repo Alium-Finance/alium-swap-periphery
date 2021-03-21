@@ -40,15 +40,6 @@ describe('UniswapV2Router02', () => {
   it('getAmountsOut', async () => {
     await token0.approve(router.address, MaxUint256)
     await token1.approve(router.address, MaxUint256)
-    console.log(      token0.address,
-      token1.address,
-      bigNumberify(10000),
-      bigNumberify(10000),
-      0,
-      0,
-      wallet.address,
-      MaxUint256,
-      overrides)
     await router.addLiquidity(
       token0.address,
       token1.address,
@@ -61,8 +52,8 @@ describe('UniswapV2Router02', () => {
       overrides
     )
 
-    await expect(router.getAmountsOut(bigNumberify(2), [token0.address])).to.be.revertedWith(
-      'UniswapV2Library: INVALID_PATH'
+   await expect(router.getAmountsOut(bigNumberify(2), [token0.address])).to.be.revertedWith(
+      'AliumLibrary: INVALID_PATH'
     )
     const path = [token0.address, token1.address]
     expect(await router.getAmountsOut(bigNumberify(2), path)).to.deep.eq([bigNumberify(2), bigNumberify(1)])
