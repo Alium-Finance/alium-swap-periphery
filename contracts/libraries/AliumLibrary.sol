@@ -21,7 +21,9 @@ library AliumLibrary {
                 hex'ff',
                 factory,
                 keccak256(abi.encodePacked(token0, token1)),
-                hex'd0d4c4cd0848c93cb4fd1f498d7013ee6bfb25783ea21593d5834f5d250ece66' // init code hash
+                hex'8fbffe982dbb74ae47a2340fa9b299a870332e54c212ef5b84f08a0f047dae0f' // init code hash
+//                hex'44d67d174c7d673c0936547f514018ec711dc14ff55facb7df74a62b6288634c' // init code hash
+                //hex'd0d4c4cd0848c93cb4fd1f498d7013ee6bfb25783ea21593d5834f5d250ece66' // init code hash
             ))));
     }
 
