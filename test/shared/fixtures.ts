@@ -4,8 +4,7 @@ import { deployContract } from 'ethereum-waffle'
 
 import { expandTo18Decimals } from './utilities'
 
-// import AliumFactory from '../../build/AliumFactory.json'
-import AliumFactory from '@aliumswap/alium-swap-core/build/AliumFactory.json'
+import AliumFactory from '../../buildV2/AliumFactory.json'
 import IAliumPair from '../../build/IAliumPair.json'
 
 import ERC20 from '../../build/ERC20.json'
@@ -36,6 +35,30 @@ interface V2Fixture {
   WETHExchangeV1: Contract
   pair: Contract
   WETHPair: Contract
+}
+
+interface AddPairResult {
+  token0: Contract
+  token1: Contract
+}
+
+export async function addPair(provider: Web3Provider, [wallet]: Wallet[], factoryV2: Contract): Promise<AddPairResult> {
+  const tokenA = await deployContract(wallet, ERC20, [expandTo18Decimals(10000)])
+  const tokenB = await deployContract(wallet, ERC20, [expandTo18Decimals(10000)])
+
+  // initialize V2
+  await factoryV2.createPair(tokenA.address, tokenB.address)
+  const pairAddress = await factoryV2.getPair(tokenA.address, tokenB.address)
+  const pair = new Contract(pairAddress, JSON.stringify(IAliumPair.abi), provider).connect(wallet)
+
+  const token0Address = await pair.token0()
+  const token0 = tokenA.address === token0Address ? tokenA : tokenB
+  const token1 = tokenA.address === token0Address ? tokenB : tokenA
+
+  return {
+    token0,
+    token1,
+  }
 }
 
 export async function v2Fixture(provider: Web3Provider, [wallet]: Wallet[]): Promise<V2Fixture> {
@@ -81,6 +104,10 @@ export async function v2Fixture(provider: Web3Provider, [wallet]: Wallet[]): Pro
   await factoryV2.createPair(WETH.address, WETHPartner.address)
   const WETHPairAddress = await factoryV2.getPair(WETH.address, WETHPartner.address)
   const WETHPair = new Contract(WETHPairAddress, JSON.stringify(IAliumPair.abi), provider).connect(wallet)
+
+
+  console.log('INIT_CODE_PAIR_HASH', await factoryV2.INIT_CODE_PAIR_HASH());
+
 
   return {
     token0,
