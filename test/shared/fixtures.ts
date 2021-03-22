@@ -43,15 +43,13 @@ interface AddPairResult {
   token1: Contract
 }
 
-export async function addPair(provider: Web3Provider, [wallet]: Wallet[], factoryV2: Contract, deployedContract: Contract|null): Promise<AddPairResult> {
-  const tokenA = await deployContract(wallet, ERC20, [expandTo18Decimals(10000)])
-  let tokenB;
-  if (deployedContract === null) {
-    tokenB = await deployContract(wallet, ERC20, [expandTo18Decimals(10000)]);
-  } else {
-    tokenB = deployedContract;
-  }
-
+export async function addPair(
+  provider: Web3Provider,
+  [wallet]: Wallet[],
+  factoryV2: Contract,
+  tokenA: Contract,
+  tokenB: Contract
+): Promise<AddPairResult> {
   // initialize V2
 
   if (AddressZero === (await factoryV2.getPair(tokenA.address, tokenB.address)).toString()) {
@@ -69,6 +67,15 @@ export async function addPair(provider: Web3Provider, [wallet]: Wallet[], factor
     token0,
     token1,
   }
+}
+
+export async function issueToken([wallet]: Wallet[], amount: number = 10000) {
+  return await deployContract(wallet, ERC20, [expandTo18Decimals(amount)])
+}
+
+export async function getPair(provider: Web3Provider, [wallet]: Wallet[], factoryV2: Contract, tokenA: Contract, tokenB: Contract) {
+  const pairAddress = await factoryV2.getPair(tokenA.address, tokenB.address)
+  return new Contract(pairAddress, JSON.stringify(IAliumPair.abi), provider).connect(wallet)
 }
 
 export async function v2Fixture(provider: Web3Provider, [wallet]: Wallet[]): Promise<V2Fixture> {
