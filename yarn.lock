@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@aliumswap/alium-swap-core@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@aliumswap/alium-swap-core/-/alium-swap-core-0.1.0.tgz#b318be88c3214d2d8afc140e1e069a439a994e08"
-  integrity sha512-oRzRPUfJgIi59oAcxnUlyCHAoYWJ6zL3Ei46V5x8mmDixFsJwobzgVRkD1FiB6y6rsBcK8qBY0d5b+dF/mTqxQ==
+"@aliumswap/alium-swap-core@^0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@aliumswap/alium-swap-core/-/alium-swap-core-0.1.3.tgz#b0948b46c3e0985b331d9e83a9fbee57035d538c"
+  integrity sha512-tVnZNf1klw/ZJL667XFcvNUXvZlILrincQi88xS3ivjs7cjwAecWDXGYBCuz84ou3+Mj7El3RlYUXLauco3HwQ==
   dependencies:
     truffle "^5.1.41"
     truffle-flattener "^1.4.4"
