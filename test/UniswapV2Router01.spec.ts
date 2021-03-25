@@ -9,6 +9,22 @@ import { expandTo18Decimals, getApprovalDigest, mineBlock, MINIMUM_LIQUIDITY } f
 import { addPair, getPair, issueToken, v2Fixture } from './shared/fixtures'
 import { Web3Provider } from 'ethers/providers'
 
+// import invariant from 'tiny-invariant'
+// import { ChainId, ONE, TradeType, ZERO } from '@aliumswap/sdk/dist/constants'
+// import { sortedInsert } from '@aliumswap/sdk/dist/utils'
+// import { Currency, ETHER } from '@aliumswap/sdk/dist/entities/currency'
+// import { CurrencyAmount } from '@aliumswap/sdk/dist/entities/fractions/currencyAmount'
+// import { Fraction } from '@aliumswap/sdk/dist/entities/fractions/fraction'
+// import { Percent } from '@aliumswap/sdk/dist/entities/fractions/percent'
+// import { Price } from '@aliumswap/sdk/dist/entities/fractions/price'
+// import { TokenAmount } from '@aliumswap/sdk/dist/entities/fractions/tokenAmount'
+// import { Pair } from '@aliumswap/sdk/dist/entities/pair'
+// import { Route } from '@aliumswap/sdk/dist/entities/route'
+// import { currencyEquals, Token, WETH } from '@aliumswap/sdk/dist/entities/token'
+
+// import { Trade } from '@aliumswap/sdk'
+// const { bestTradeExactIn } = Trade
+
 chai.use(solidity)
 
 const overrides = {
@@ -153,6 +169,82 @@ describe('UniswapV2Router{01,02}', () => {
           )
 
         expect(await WETHPair.balanceOf(wallet.address)).to.eq(expectedLiquidity.sub(MINIMUM_LIQUIDITY))
+      })
+
+      it('addLiquidityETH with Fee:on', async () => {
+
+        let feeAddress = '0x0000000000000000000000000000000000000FEE'
+        await factory.setFeeTo(feeAddress)
+
+        expect(await factory.feeTo()).to.eq(feeAddress, "Wrong fee address")
+
+        const WETHPartnerAmount = expandTo18Decimals(1)
+        const ETHAmount = expandTo18Decimals(4)
+
+        const expectedLiquidity = expandTo18Decimals(2)
+        const WETHPairToken0 = await WETHPair.token0()
+        await WETHPartner.approve(router.address, MaxUint256)
+
+        await router.addLiquidityETH(
+            WETHPartner.address,
+            WETHPartnerAmount,
+            WETHPartnerAmount,
+            ETHAmount,
+            wallet.address,
+            MaxUint256,
+            { ...overrides, value: ETHAmount }
+          )
+
+        let walletAddress = String(wallet.address);
+
+        expect(await WETHPair.balanceOf(feeAddress)).to.eq(0)
+        expect(await WETHPair.balanceOf(walletAddress)).to.eq(expectedLiquidity.sub(MINIMUM_LIQUIDITY))
+
+        let pair = await getPair(provider, [wallet], factory, WETHPartner, WETH)
+        await pair.approve(router.address, MaxUint256)
+
+        await router.removeLiquidityETH(
+          WETHPartner.address,
+          expectedLiquidity.sub(MINIMUM_LIQUIDITY),
+          0,
+          0,
+          wallet.address,
+          MaxUint256,
+          overrides
+        )
+
+        expect(await WETHPair.balanceOf(feeAddress)).to.eq(0)
+        expect(await WETHPair.balanceOf(walletAddress)).to.eq(0)
+      })
+
+      it('addLiquidityETH with Fee:on should fail', async () => {
+
+        let feeAddress = '0x0000000000000000000000000000000000000FEE'
+        await factory.setFeeTo(feeAddress)
+
+        expect(await factory.feeTo()).to.eq(feeAddress, "Wrong fee address")
+
+        const WETHPartnerAmount = expandTo18Decimals(1)
+        const ETHAmount = expandTo18Decimals(4)
+
+        const expectedLiquidity = expandTo18Decimals(2)
+        const WETHPairToken0 = await WETHPair.token0()
+        await WETHPartner.approve(router.address, MaxUint256)
+
+        await router.addLiquidityETH(
+          feeAddress,
+          WETHPartnerAmount,
+          WETHPartnerAmount,
+          ETHAmount,
+          wallet.address,
+          MaxUint256,
+          { ...overrides, value: ETHAmount }
+        )
+
+        let walletAddress = String(wallet.address);
+
+        expect(await WETHPair.balanceOf(feeAddress)).to.eq(0)
+        expect(await WETHPair.balanceOf(walletAddress)).to.eq(expectedLiquidity.sub(MINIMUM_LIQUIDITY))
       })
 
       async function addLiquidity(token0Amount: BigNumber, token1Amount: BigNumber) {
@@ -414,6 +506,78 @@ describe('UniswapV2Router{01,02}', () => {
             MaxUint256,
             overrides
           )
+        })
+
+        it('happy path, length path 2, 5 swap order', async () => {
+
+          await addLiquidityOrigin(token0, token2, token0Amount, token2Amount)
+          await addLiquidityOrigin(token1, token2, token1Amount, token2Amount)
+          await addLiquidityOrigin(token2, token3, token2Amount, token3Amount)
+
+          await token0.approve(router.address, MaxUint256)
+          await token1.approve(router.address, MaxUint256)
+          await token2.approve(router.address, MaxUint256)
+          await token3.approve(router.address, MaxUint256)
+
+          const order = 5
+          for (let i = 0; i < order; i++) {
+            await router.swapExactTokensForTokens(
+              swapAmount,
+              0,
+              [token0.address, token3.address],
+              wallet.address,
+              MaxUint256,
+              overrides
+            )
+          }
+        })
+
+        it('happy path, length path 4, 5 swap order', async () => {
+
+          await addLiquidityOrigin(token0, token2, token0Amount, token2Amount)
+          await addLiquidityOrigin(token1, token2, token1Amount, token2Amount)
+          await addLiquidityOrigin(token2, token3, token2Amount, token3Amount)
+
+          await token0.approve(router.address, MaxUint256)
+          await token1.approve(router.address, MaxUint256)
+          await token2.approve(router.address, MaxUint256)
+          await token3.approve(router.address, MaxUint256)
+
+          const order = 5
+          for (let i = 0; i < order; i++) {
+            await router.swapExactTokensForTokens(
+              swapAmount,
+              0,
+              [token0.address, token1.address, token2.address, token3.address],
+              wallet.address,
+              MaxUint256,
+              overrides
+            )
+          }
+        })
+
+        it('happy path, path length 4, 10 swap order', async () => {
+
+          await addLiquidityOrigin(token0, token2, token0Amount, token2Amount)
+          await addLiquidityOrigin(token1, token2, token1Amount, token2Amount)
+          await addLiquidityOrigin(token2, token3, token2Amount, token3Amount)
+
+          await token0.approve(router.address, MaxUint256)
+          await token1.approve(router.address, MaxUint256)
+          await token2.approve(router.address, MaxUint256)
+          await token3.approve(router.address, MaxUint256)
+
+          const order = 10
+          for (let i = 0; i < order; i++) {
+            await router.swapExactTokensForTokens(
+              swapAmount,
+              0,
+              [token0.address, token1.address, token2.address, token3.address],
+              wallet.address,
+              MaxUint256,
+              overrides
+            )
+          }
         })
 
         it('amounts', async () => {
