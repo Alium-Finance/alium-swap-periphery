@@ -1,6 +1,4 @@
-/**
- *Submitted for verification at BscScan.com on 2021-04-23
-*/
+// SPDX-License-Identifier: MIT
 
 // File: @uniswap\lib\contracts\libraries\TransferHelper.sol
 
@@ -403,7 +401,7 @@ abstract contract Context {
         return msg.sender;
     }
 
-    function _msgData() internal view virtual returns (bytes memory) {
+    function _msgData() internal pure virtual returns (bytes memory) {
         return msg.data;
     }
 }
@@ -508,11 +506,11 @@ abstract contract Tax is ITax, Ownable {
     }
 }
 
-// File: contracts\PancakeRouter.sol
+// File: contracts\AliumSideSwapWithPancakeRouter.sol
 
 pragma solidity =0.6.6;
 
-contract PancakeRouter is IPancakeRouter02, Tax {
+contract AliumSideSwapWithPancakeRouter is IPancakeRouter02, Tax {
     using SafeMath for uint;
 
     address public immutable override factory;
@@ -724,6 +722,7 @@ contract PancakeRouter is IPancakeRouter02, Tax {
             );
         }
     }
+    // @dev amountOutMin (+fee%)
     function swapExactTokensForTokens(
         uint amountIn,
         uint amountOutMin,
@@ -731,13 +730,23 @@ contract PancakeRouter is IPancakeRouter02, Tax {
         address to,
         uint deadline
     ) external virtual override ensure(deadline) returns (uint[] memory amounts) {
-        amounts = PancakeLibrary.getAmountsOut(factory, amountIn, path);
+        uint256 toDev = fee * amountIn / DECIMAL;
+        if (toDev > 0 && feeTo != address(0)) {
+            TransferHelper.safeTransferFrom(
+                path[0],
+                msg.sender,
+                feeTo,
+                toDev
+            );
+        }
+        amounts = PancakeLibrary.getAmountsOut(factory, amountIn - toDev, path);
         require(amounts[amounts.length - 1] >= amountOutMin, 'PancakeRouter: INSUFFICIENT_OUTPUT_AMOUNT');
         TransferHelper.safeTransferFrom(
             path[0], msg.sender, PancakeLibrary.pairFor(factory, path[0], path[1]), amounts[0]
         );
         _swap(amounts, path, to);
     }
+    // @dev amountInMax (+fee%)
     function swapTokensForExactTokens(
         uint amountOut,
         uint amountInMax,
@@ -745,7 +754,16 @@ contract PancakeRouter is IPancakeRouter02, Tax {
         address to,
         uint deadline
     ) external virtual override ensure(deadline) returns (uint[] memory amounts) {
-        amounts = PancakeLibrary.getAmountsIn(factory, amountOut, path);
+        uint256 toDev = fee * amountOut / DECIMAL;
+        if (toDev > 0 && feeTo != address(0)) {
+            TransferHelper.safeTransferFrom(
+                path[0],
+                msg.sender,
+                feeTo,
+                toDev
+            );
+        }
+        amounts = PancakeLibrary.getAmountsIn(factory, amountOut - toDev, path);
         require(amounts[0] <= amountInMax, 'PancakeRouter: EXCESSIVE_INPUT_AMOUNT');
         TransferHelper.safeTransferFrom(
             path[0], msg.sender, PancakeLibrary.pairFor(factory, path[0], path[1]), amounts[0]
@@ -761,7 +779,11 @@ contract PancakeRouter is IPancakeRouter02, Tax {
     returns (uint[] memory amounts)
     {
         require(path[0] == WETH, 'PancakeRouter: INVALID_PATH');
-        amounts = PancakeLibrary.getAmountsOut(factory, msg.value, path);
+        uint256 toDev = fee * msg.value / DECIMAL;
+        if (toDev > 0 && feeTo != address(0)) {
+            TransferHelper.safeTransferETH(feeTo, toDev);
+        }
+        amounts = PancakeLibrary.getAmountsOut(factory, msg.value - toDev, path);
         require(amounts[amounts.length - 1] >= amountOutMin, 'PancakeRouter: INSUFFICIENT_OUTPUT_AMOUNT');
         IWETH(WETH).deposit{value: amounts[0]}();
         assert(IWETH(WETH).transfer(PancakeLibrary.pairFor(factory, path[0], path[1]), amounts[0]));
@@ -809,6 +831,7 @@ contract PancakeRouter is IPancakeRouter02, Tax {
         }
         TransferHelper.safeTransferETH(to, amounts[amounts.length - 1] - toDev);
     }
+    // @dev amountOut - take into account the correction for the fee
     function swapETHForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline)
     external
     virtual
@@ -818,13 +841,18 @@ contract PancakeRouter is IPancakeRouter02, Tax {
     returns (uint[] memory amounts)
     {
         require(path[0] == WETH, 'PancakeRouter: INVALID_PATH');
+        uint256 toDev = fee * msg.value / DECIMAL;
+        if (toDev > 0 && feeTo != address(0)) {
+            TransferHelper.safeTransferETH(feeTo, toDev);
+        }
+        uint deposit = msg.value - toDev;
         amounts = PancakeLibrary.getAmountsIn(factory, amountOut, path);
-        require(amounts[0] <= msg.value, 'PancakeRouter: EXCESSIVE_INPUT_AMOUNT');
+        require(amounts[0] <= deposit, 'PancakeRouter: EXCESSIVE_INPUT_AMOUNT');
         IWETH(WETH).deposit{value: amounts[0]}();
         assert(IWETH(WETH).transfer(PancakeLibrary.pairFor(factory, path[0], path[1]), amounts[0]));
         _swap(amounts, path, to);
         // refund dust eth, if any
-        if (msg.value > amounts[0]) TransferHelper.safeTransferETH(msg.sender, msg.value - amounts[0]);
+        if (deposit > amounts[0]) TransferHelper.safeTransferETH(msg.sender, deposit - amounts[0]);
     }
 
     // **** SWAP (supporting fee-on-transfer tokens) ****
