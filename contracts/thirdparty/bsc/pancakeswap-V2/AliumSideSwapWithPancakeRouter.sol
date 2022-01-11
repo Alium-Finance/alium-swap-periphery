@@ -2,7 +2,7 @@
 
 // File: @uniswap\lib\contracts\libraries\TransferHelper.sol
 
-pragma solidity >=0.6.0;
+pragma solidity =0.6.6;
 
 // helper methods for interacting with ERC20 tokens and sending ETH that do not consistently return true/false
 library TransferHelper {
@@ -31,8 +31,6 @@ library TransferHelper {
 }
 
 // File: contracts\interfaces\IPancakeRouter01.sol
-
-pragma solidity >=0.6.2;
 
 interface IPancakeRouter01 {
     function factory() external pure returns (address);
@@ -130,8 +128,6 @@ interface IPancakeRouter01 {
 
 // File: contracts\interfaces\IPancakeRouter02.sol
 
-pragma solidity >=0.6.2;
-
 interface IPancakeRouter02 is IPancakeRouter01 {
     function removeLiquidityETHSupportingFeeOnTransferTokens(
         address token,
@@ -175,8 +171,6 @@ interface IPancakeRouter02 is IPancakeRouter01 {
 
 // File: contracts\interfaces\IPancakeFactory.sol
 
-pragma solidity >=0.5.0;
-
 interface IPancakeFactory {
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
 
@@ -197,8 +191,6 @@ interface IPancakeFactory {
 
 // File: contracts\libraries\SafeMath.sol
 
-pragma solidity =0.6.6;
-
 // a library for performing overflow-safe math, courtesy of DappHub (https://github.com/dapphub/ds-math)
 
 library SafeMath {
@@ -216,8 +208,6 @@ library SafeMath {
 }
 
 // File: contracts\interfaces\IPancakePair.sol
-
-pragma solidity >=0.5.0;
 
 interface IPancakePair {
     event Approval(address indexed owner, address indexed spender, uint value);
@@ -271,10 +261,6 @@ interface IPancakePair {
 }
 
 // File: contracts\libraries\PancakeLibrary.sol
-
-pragma solidity >=0.5.0;
-
-
 
 library PancakeLibrary {
     using SafeMath for uint;
@@ -356,8 +342,6 @@ library PancakeLibrary {
 
 // File: contracts\interfaces\IERC20.sol
 
-pragma solidity >=0.5.0;
-
 interface IERC20 {
     event Approval(address indexed owner, address indexed spender, uint value);
     event Transfer(address indexed from, address indexed to, uint value);
@@ -375,8 +359,6 @@ interface IERC20 {
 }
 
 // File: contracts\interfaces\IWETH.sol
-
-pragma solidity >=0.5.0;
 
 interface IWETH {
     function deposit() external payable;
@@ -507,8 +489,6 @@ abstract contract Tax is ITax, Ownable {
 }
 
 // File: contracts\AliumSideSwapWithPancakeRouter.sol
-
-pragma solidity =0.6.6;
 
 contract AliumSideSwapWithPancakeRouter is IPancakeRouter02, Tax {
     using SafeMath for uint;
