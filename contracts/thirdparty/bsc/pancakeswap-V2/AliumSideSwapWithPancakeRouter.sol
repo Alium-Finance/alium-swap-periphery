@@ -502,6 +502,12 @@ contract AliumSideSwapWithPancakeRouter is IPancakeRouter02, Tax {
     }
 
     constructor(address _factory, address _WETH) public {
+        require(
+            _factory != address(0) &&
+            _WETH != address(0),
+            "PancakeRouter: ZERO_ADDRESS_SET"
+        );
+
         factory = _factory;
         WETH = _WETH;
     }
