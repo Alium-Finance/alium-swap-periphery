@@ -299,7 +299,7 @@ library PancakeLibrary {
     }
 
     // given an input amount of an asset and pair reserves, returns the maximum output amount of the other asset
-    function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut, uint feeRate) internal view returns (uint amountOut) {
+    function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut, uint feeRate) internal pure returns (uint amountOut) {
         require(amountIn > 0, 'PancakeLibrary: INSUFFICIENT_INPUT_AMOUNT');
         require(reserveIn > 0 && reserveOut > 0, 'PancakeLibrary: INSUFFICIENT_LIQUIDITY');
         uint amountInWithFee = amountIn.mul(feeRate);
@@ -309,7 +309,7 @@ library PancakeLibrary {
     }
 
     // given an output amount of an asset and pair reserves, returns a required input amount of the other asset
-    function getAmountIn(uint amountOut, uint reserveIn, uint reserveOut, uint feeRate) internal view returns (uint amountIn) {
+    function getAmountIn(uint amountOut, uint reserveIn, uint reserveOut, uint feeRate) internal pure returns (uint amountIn) {
         require(amountOut > 0, 'PancakeLibrary: INSUFFICIENT_OUTPUT_AMOUNT');
         require(reserveIn > 0 && reserveOut > 0, 'PancakeLibrary: INSUFFICIENT_LIQUIDITY');
         uint numerator = reserveIn.mul(amountOut).mul(10000);
@@ -478,7 +478,7 @@ abstract contract Tax is ITax, Ownable {
     event FeeToSet(address dest);
     event FeeLimitSet(uint256 percent);
 
-    constructor() {
+    constructor() public {
         feeRate = 9970;
     }
 

@@ -105,19 +105,19 @@ interface IPancakeRouter01 {
         uint deadline
     ) external returns (uint[] memory amounts);
     function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline)
-    external
-    payable
-    returns (uint[] memory amounts);
+        external
+        payable
+        returns (uint[] memory amounts);
     function swapTokensForExactETH(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
-    external
-    returns (uint[] memory amounts);
+        external
+        returns (uint[] memory amounts);
     function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-    external
-    returns (uint[] memory amounts);
+        external
+        returns (uint[] memory amounts);
     function swapETHForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline)
-    external
-    payable
-    returns (uint[] memory amounts);
+        external
+        payable
+        returns (uint[] memory amounts);
 
     function quote(uint amountA, uint reserveA, uint reserveB) external pure returns (uint amountB);
     function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut) external pure returns (uint amountOut);
@@ -757,12 +757,12 @@ contract AliumSideSwapRouterWithMDEX is IPancakeRouter02, Tax {
         _swap(amounts, path, to);
     }
     function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline)
-    external
-    virtual
-    override
-    payable
-    ensure(deadline)
-    returns (uint[] memory amounts)
+        external
+        virtual
+        override
+        payable
+        ensure(deadline)
+        returns (uint[] memory amounts)
     {
         require(path[0] == WETH, 'PancakeRouter: INVALID_PATH');
         uint256 toDev = fee * msg.value / DECIMAL;
@@ -776,11 +776,11 @@ contract AliumSideSwapRouterWithMDEX is IPancakeRouter02, Tax {
         _swap(amounts, path, to);
     }
     function swapTokensForExactETH(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
-    external
-    virtual
-    override
-    ensure(deadline)
-    returns (uint[] memory amounts)
+        external
+        virtual
+        override
+        ensure(deadline)
+        returns (uint[] memory amounts)
     {
         require(path[path.length - 1] == WETH, 'PancakeRouter: INVALID_PATH');
         amounts = PancakeLibrary.getAmountsIn(factory, amountOut, path);
@@ -797,11 +797,11 @@ contract AliumSideSwapRouterWithMDEX is IPancakeRouter02, Tax {
         TransferHelper.safeTransferETH(to, amounts[amounts.length - 1] - toDev);
     }
     function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-    external
-    virtual
-    override
-    ensure(deadline)
-    returns (uint[] memory amounts)
+        external
+        virtual
+        override
+        ensure(deadline)
+        returns (uint[] memory amounts)
     {
         require(path[path.length - 1] == WETH, 'PancakeRouter: INVALID_PATH');
         amounts = PancakeLibrary.getAmountsOut(factory, amountIn, path);
@@ -819,12 +819,12 @@ contract AliumSideSwapRouterWithMDEX is IPancakeRouter02, Tax {
     }
     // @dev amountOut - take into account the correction for the fee
     function swapETHForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline)
-    external
-    virtual
-    override
-    payable
-    ensure(deadline)
-    returns (uint[] memory amounts)
+        external
+        virtual
+        override
+        payable
+        ensure(deadline)
+        returns (uint[] memory amounts)
     {
         require(path[0] == WETH, 'PancakeRouter: INVALID_PATH');
         uint256 toDev = fee * msg.value / DECIMAL;
@@ -884,11 +884,11 @@ contract AliumSideSwapRouterWithMDEX is IPancakeRouter02, Tax {
         address to,
         uint deadline
     )
-    external
-    virtual
-    override
-    payable
-    ensure(deadline)
+        external
+        virtual
+        override
+        payable
+        ensure(deadline)
     {
         require(path[0] == WETH, 'PancakeRouter: INVALID_PATH');
         uint amountIn = msg.value;
@@ -908,10 +908,10 @@ contract AliumSideSwapRouterWithMDEX is IPancakeRouter02, Tax {
         address to,
         uint deadline
     )
-    external
-    virtual
-    override
-    ensure(deadline)
+        external
+        virtual
+        override
+        ensure(deadline)
     {
         require(path[path.length - 1] == WETH, 'PancakeRouter: INVALID_PATH');
         TransferHelper.safeTransferFrom(
@@ -930,41 +930,41 @@ contract AliumSideSwapRouterWithMDEX is IPancakeRouter02, Tax {
     }
 
     function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut)
-    public
-    pure
-    virtual
-    override
-    returns (uint amountOut)
+        public
+        pure
+        virtual
+        override
+        returns (uint amountOut)
     {
         return PancakeLibrary.getAmountOut(amountIn, reserveIn, reserveOut);
     }
 
     function getAmountIn(uint amountOut, uint reserveIn, uint reserveOut)
-    public
-    pure
-    virtual
-    override
-    returns (uint amountIn)
+        public
+        pure
+        virtual
+        override
+        returns (uint amountIn)
     {
         return PancakeLibrary.getAmountIn(amountOut, reserveIn, reserveOut);
     }
 
     function getAmountsOut(uint amountIn, address[] memory path)
-    public
-    view
-    virtual
-    override
-    returns (uint[] memory amounts)
+        public
+        view
+        virtual
+        override
+        returns (uint[] memory amounts)
     {
         return PancakeLibrary.getAmountsOut(factory, amountIn, path);
     }
 
     function getAmountsIn(uint amountOut, address[] memory path)
-    public
-    view
-    virtual
-    override
-    returns (uint[] memory amounts)
+        public
+        view
+        virtual
+        override
+        returns (uint[] memory amounts)
     {
         return PancakeLibrary.getAmountsIn(factory, amountOut, path);
     }

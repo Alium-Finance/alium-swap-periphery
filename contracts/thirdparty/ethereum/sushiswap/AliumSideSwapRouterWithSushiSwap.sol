@@ -488,9 +488,9 @@ abstract contract Tax is ITax, Ownable {
     }
 }
 
-// File: contracts\AliumSideSwapWithPancakeRouter.sol
+// File: contracts\AliumSideSwapRouterWithSushiSwap.sol
 
-contract AliumSideSwapWithPancakeRouter is IPancakeRouter02, Tax {
+contract AliumSideSwapRouterWithSushiSwap is IPancakeRouter02, Tax {
     using SafeMath for uint;
 
     address public immutable override factory;
